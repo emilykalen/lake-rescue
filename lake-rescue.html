@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lake Rescue Family Trip</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --slate: #2C4A52; --slate-light: #3d6470; --pine: #8B6914; --pine-light: #b08a28;
+    --linen: #F5F0E8; --water: #A8C5CC; --water-light: #d4e8ec; --white: #FEFCF8;
+    --ink: #1a2e33; --muted: #6b8a92; --border: #d8cfc0; --success: #4a7c5c;
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--ink); min-height: 100vh; }
+
+  /* HERO */
+  .hero { background: var(--slate); position: relative; overflow: hidden; padding: 2.5rem 1.5rem 0; text-align: center; }
+  .hero-label { font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--water); margin-bottom: 0.5rem; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 6vw, 3.2rem); color: var(--white); line-height: 1.15; font-weight: 700; }
+  .hero h1 em { font-style: italic; color: var(--water-light); }
+  .hero-sub { font-size: 0.85rem; color: var(--water); margin-top: 0.5rem; font-weight: 300; letter-spacing: 0.05em; }
+  .hero-wave { display: block; width: 100%; margin-top: 1.5rem; line-height: 0; }
+
+  /* NAV TABS */
+  .tabs { background: var(--white); border-bottom: 1px solid var(--border); display: flex; justify-content: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(44,74,82,0.08); overflow-x: auto; }
+  .tab-btn { font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); background: none; border: none; padding: 0.9rem 1.1rem; cursor: pointer; border-bottom: 3px solid transparent; transition: color 0.2s, border-color 0.2s; white-space: nowrap; }
+  .tab-btn.active { color: var(--slate); border-bottom-color: var(--pine); }
+  .tab-btn:hover:not(.active) { color: var(--slate-light); }
+
+  /* PANELS */
+  .panel { display: none; max-width: 780px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+  .panel.active { display: block; }
+
+  /* SECTION HEADING */
+  .section-head { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; }
+  .section-head h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--slate); font-weight: 700; }
+  .section-head .line { flex: 1; height: 1px; background: var(--border); }
+
+  /* START HERE CARDS */
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 1rem; }
+  @media (max-width: 520px) { .info-grid { grid-template-columns: 1fr; } }
+  .info-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 0.85rem; box-shadow: 0 1px 4px rgba(44,74,82,0.06); }
+  .info-card .ic-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--pine); margin-bottom: 0.3rem; }
+  .info-card .ic-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--slate); margin-bottom: 0.4rem; }
+  .info-card .ic-row { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; font-size: 0.75rem; margin-bottom: 0.15rem; }
+  .info-card .ic-key { color: var(--muted); white-space: nowrap; }
+  .info-card .ic-val { font-weight: 600; color: var(--ink); text-align: right; }
+  .info-card .ic-addr { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; }
+
+  /* WEATHER WIDGET */
+  .weather-bar { background: var(--slate); color: var(--white); border-radius: 8px; padding: 0.65rem 0.85rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+  .weather-bar .wb-loc { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--water); flex-basis: 100%; margin-bottom: -0.25rem; }
+  .weather-bar .wb-icon { font-size: 1.4rem; line-height: 1; }
+  .weather-bar .wb-temps { display: flex; gap: 0.5rem; align-items: baseline; }
+  .weather-bar .wb-high { font-size: 1.1rem; font-weight: 700; }
+  .weather-bar .wb-low { font-size: 0.82rem; color: var(--water); }
+  .weather-bar .wb-desc { font-size: 0.75rem; color: var(--water-light); flex: 1; }
+  .weather-bar .wb-precip { font-size: 0.7rem; background: rgba(255,255,255,0.1); padding: 0.15rem 0.5rem; border-radius: 20px; color: var(--water-light); white-space: nowrap; }
+  .weather-loading { color: var(--water); font-size: 0.8rem; }
+
+  /* TODAY'S DAY CARD */
+  .today-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 1.5rem; box-shadow: 0 1px 4px rgba(44,74,82,0.06); }
+  .today-header { background: var(--slate); color: var(--white); padding: 0.85rem 1.1rem; }
+  .today-header .th-eyebrow { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--water); margin-bottom: 0.2rem; }
+  .today-header .th-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; }
+  .today-body { padding: 0.85rem 1.1rem; }
+  .today-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+  .today-item:last-child { border-bottom: none; }
+  .ti-time { font-size: 0.7rem; font-weight: 600; color: var(--pine); text-transform: uppercase; letter-spacing: 0.06em; min-width: 75px; padding-top: 0.1rem; }
+  .ti-label { font-size: 0.88rem; font-weight: 500; color: var(--ink); flex: 1; }
+  .ti-badge { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.18rem 0.5rem; border-radius: 20px; white-space: nowrap; margin-top: 0.05rem; }
+  .ti-badge.confirmed { background: #d4edda; color: #2d6a3f; }
+  .ti-badge.flexible { background: var(--linen); color: var(--muted); border: 1px solid var(--border); }
+  .no-today { text-align: center; padding: 1.5rem; color: var(--muted); font-size: 0.85rem; }
+
+  /* DAY CARDS */
+  .day-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 1rem; overflow: hidden; box-shadow: 0 1px 4px rgba(44,74,82,0.06); }
+  .day-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; cursor: pointer; user-select: none; }
+  .day-header:hover { background: rgba(168,197,204,0.1); }
+  .day-header-left { display: flex; align-items: center; gap: 0.85rem; }
+  .day-pill { background: var(--slate); color: var(--white); font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.25rem 0.65rem; border-radius: 20px; white-space: nowrap; }
+  .day-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: var(--slate); font-weight: 700; }
+  .day-chevron { color: var(--muted); font-size: 1rem; transition: transform 0.25s; }
+  .day-card.open .day-chevron { transform: rotate(180deg); }
+  .day-body { display: none; padding: 0 1.25rem 1.25rem; }
+  .day-card.open .day-body { display: block; }
+
+  /* TIMELINE */
+  .timeline { position: relative; padding-left: 1.5rem; }
+  .timeline::before { content: ''; position: absolute; left: 0.3rem; top: 0.5rem; bottom: 0.5rem; width: 1px; background: var(--water); }
+  .tl-item { position: relative; margin-bottom: 1rem; }
+  .tl-dot { position: absolute; left: -1.27rem; top: 0.35rem; width: 9px; height: 9px; border-radius: 50%; background: var(--water); border: 2px solid var(--white); box-shadow: 0 0 0 1px var(--water); }
+  .tl-time { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pine); margin-bottom: 0.15rem; }
+  .tl-label { font-size: 0.9rem; font-weight: 500; color: var(--ink); line-height: 1.4; }
+  .tl-sub { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; line-height: 1.5; }
+  .tl-sub ul { padding-left: 1rem; }
+  .tl-sub li { margin-bottom: 0.1rem; }
+
+  /* ASSIGNMENTS */
+  .assign-row { display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap; }
+  .assign-card { flex: 1; min-width: 140px; background: var(--linen); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; }
+  .assign-card .assign-role { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pine); margin-bottom: 0.3rem; }
+  .assign-card .assign-who { font-size: 0.88rem; font-weight: 600; color: var(--slate); }
+  .assign-card .assign-detail { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; line-height: 1.4; }
+  .assign-card.meal-card { border-left: 3px solid var(--pine-light); }
+  .assign-card.clean-card { border-left: 3px solid var(--water); }
+
+  /* FAMILY GROUPS */
+  .family-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 2rem; }
+  .family-chip { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 0.85rem; box-shadow: 0 1px 3px rgba(44,74,82,0.05); }
+  .family-chip .chip-name { font-size: 0.75rem; font-weight: 600; color: var(--slate); letter-spacing: 0.03em; margin-bottom: 0.25rem; }
+  .family-chip .chip-members { font-size: 0.72rem; color: var(--muted); line-height: 1.4; }
+
+  /* FORMS */
+  .form-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 4px rgba(44,74,82,0.06); }
+  .form-card h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--slate); margin-bottom: 0.3rem; }
+  .form-card .form-desc { font-size: 0.8rem; color: var(--muted); margin-bottom: 1.25rem; line-height: 1.5; }
+  .form-group { margin-bottom: 1rem; }
+  .form-label { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--slate); margin-bottom: 0.35rem; }
+  .form-input, .form-select, .form-textarea { width: 100%; font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--ink); background: var(--linen); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.85rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--slate); box-shadow: 0 0 0 3px rgba(44,74,82,0.1); background: var(--white); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .btn { font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.65rem 1.5rem; border-radius: 6px; border: none; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--slate); color: var(--white); }
+  .btn-primary:hover { background: var(--slate-light); }
+
+  /* SUBMISSIONS */
+  .submissions-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .submissions-head h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--slate); }
+  .badge { background: var(--slate); color: var(--white); font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.55rem; border-radius: 20px; }
+  .empty-state { text-align: center; padding: 2rem 1rem; color: var(--muted); font-size: 0.85rem; }
+  .empty-state .empty-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+
+  /* GROCERY ITEMS */
+  .grocery-item { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 0.6rem; display: flex; align-items: flex-start; gap: 0.75rem; }
+  .grocery-item .gi-family { background: var(--water-light); color: var(--slate); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.2rem 0.55rem; border-radius: 4px; white-space: nowrap; margin-top: 0.1rem; }
+  .grocery-item .gi-content { flex: 1; }
+  .grocery-item .gi-items { font-size: 0.88rem; color: var(--ink); font-weight: 500; line-height: 1.4; }
+  .grocery-item .gi-note { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+  .grocery-item .gi-delete { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9rem; padding: 0.1rem; opacity: 0.5; transition: opacity 0.2s; }
+  .grocery-item .gi-delete:hover { opacity: 1; color: #c0392b; }
+
+  /* MEAL ITEMS */
+  .meal-item { background: var(--white); border: 1px solid var(--border); border-left: 3px solid var(--pine-light); border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 0.6rem; }
+  .meal-item .mi-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; }
+  .meal-item .mi-day { font-size: 0.7rem; color: var(--muted); background: var(--linen); padding: 0.15rem 0.5rem; border-radius: 4px; flex: 1; }
+  .meal-item .mi-menu { font-size: 0.88rem; color: var(--ink); line-height: 1.5; }
+  .meal-item .mi-note { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }
+  .meal-item .mi-actions { display: flex; gap: 0.4rem; margin-top: 0.65rem; }
+  .mi-btn { font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; padding: 0.3rem 0.75rem; border-radius: 5px; border: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+  .mi-btn-edit { background: var(--linen); color: var(--slate); }
+  .mi-btn-edit:hover { background: var(--water-light); }
+  .mi-btn-delete { background: var(--linen); color: #b03a2e; border-color: #e8b4af; }
+  .mi-btn-delete:hover { background: #fde9e7; }
+
+  /* QUICK REF */
+  .quick-ref { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.25rem; margin-bottom: 1.5rem; }
+  .quick-ref .qr-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem; }
+  .quick-ref .qr-row { display: flex; justify-content: space-between; font-size: 0.82rem; padding: 0.3rem 0; border-bottom: 1px solid rgba(0,0,0,0.04); }
+  .quick-ref .qr-row:last-child { border-bottom: none; }
+  .quick-ref .qr-meal { color: var(--muted); }
+  .quick-ref .qr-who { font-weight: 600; color: var(--slate); }
+
+  .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--success); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.85rem; font-weight: 500; z-index: 999; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 500px) {
+    .tab-btn { padding: 0.85rem 0.75rem; font-size: 0.68rem; }
+    .assign-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">June · Lake Rescue, Vermont</div>
+  <h1>Lake <em>Rescue</em><br>Family Trip</h1>
+  <div class="hero-sub">Saturday–Thursday &nbsp;·&nbsp; 19 Guests &nbsp;·&nbsp; 5 Family Groups</div>
+  <svg class="hero-wave" viewBox="0 0 800 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <path d="M0,40 C100,10 200,55 300,35 C400,15 500,50 600,30 C700,10 750,45 800,25 L800,60 L0,60 Z" fill="#F5F0E8"/>
+    <path d="M0,50 C120,25 250,55 380,38 C510,20 620,52 800,35 L800,60 L0,60 Z" fill="#F5F0E8" opacity="0.5"/>
+  </svg>
+</div>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="showTab('starthere')">🏠 Start Here</button>
+  <button class="tab-btn" onclick="showTab('itinerary')">📅 Itinerary</button>
+  <button class="tab-btn" onclick="showTab('groceries')">🛒 Groceries</button>
+  <button class="tab-btn" onclick="showTab('meals')">🍽 Meal Plans</button>
+</nav>
+
+<!-- ===== START HERE ===== -->
+<div class="panel active" id="panel-starthere">
+
+  <!-- Weather -->
+  <div id="weather-widget">
+    <div class="weather-bar"><span class="weather-loading">Loading weather for Ludlow, VT…</span></div>
+  </div>
+
+  <!-- House Info -->
+  <div class="info-grid" style="margin-top:0.25rem">
+    <div class="info-card">
+      <div class="ic-label">House 1</div>
+      <div class="ic-addr">67 Benson Pt., Ludlow VT</div>
+      <div class="ic-row"><span class="ic-key">WiFi</span><span class="ic-val">KalenLakehouse</span></div>
+      <div class="ic-row"><span class="ic-key">Password</span><span class="ic-val">Benson67</span></div>
+    </div>
+    <div class="info-card">
+      <div class="ic-label">House 2</div>
+      <div class="ic-addr">1616 Vermont 100, Ludlow VT</div>
+      <div class="ic-row"><span class="ic-key">WiFi</span><span class="ic-val">SISU-413</span></div>
+      <div class="ic-row"><span class="ic-key">Password</span><span class="ic-val">Ludlowvt</span></div>
+    </div>
+  </div>
+
+  <!-- Today's Schedule -->
+  <div class="section-head">
+    <h2>Today</h2>
+    <div class="line"></div>
+  </div>
+  <div id="today-schedule"></div>
+
+</div>
+
+<!-- ===== ITINERARY ===== -->
+<div class="panel" id="panel-itinerary">
+
+  <div class="section-head" style="margin-top:0.5rem">
+    <h2>The Crew</h2>
+    <div class="line"></div>
+  </div>
+  <div class="family-grid">
+    <div class="family-chip"><div class="chip-name">Majcen</div><div class="chip-members">Emily, Dan,<br>Mia, Jack</div></div>
+    <div class="family-chip"><div class="chip-name">CT Kalen</div><div class="chip-members">Abby, Mike,<br>Jeremy</div></div>
+    <div class="family-chip"><div class="chip-name">MD Kalen</div><div class="chip-members">Alex, Caitlin,<br>Greyson, Lucas</div></div>
+    <div class="family-chip"><div class="chip-name">Team Barry</div><div class="chip-members">Dave, Papa,<br>Evan, Karlyn</div></div>
+    <div class="family-chip"><div class="chip-name">Team Ilene</div><div class="chip-members">Lori, Lee,<br>Matt, Grandma</div></div>
+  </div>
+
+  <div class="section-head">
+    <h2>Schedule</h2>
+    <div class="line"></div>
+  </div>
+
+  <!-- Saturday -->
+  <div class="day-card open" id="day-sat">
+    <div class="day-header" onclick="toggleDay('day-sat')">
+      <div class="day-header-left"><span class="day-pill">Saturday</span><span class="day-title">Arrival Day</span></div>
+      <span class="day-chevron">▾</span>
+    </div>
+    <div class="day-body">
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">Afternoon</div><div class="tl-label">Arrivals & Lake Time</div><div class="tl-sub">Settle into houses · Snacks and drinks at Benson House</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">4:00 PM</div><div class="tl-label">🖐 Father's Day Craft</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">5:30 PM</div><div class="tl-label">🍕 Pizza Night</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">8:00 PM</div><div class="tl-label">🔥 Bonfire, Cards & Cocktails</div><div class="tl-sub">Catching up around the fire</div></div>
+      </div>
+      <div class="assign-row">
+        <div class="assign-card meal-card">
+          <div class="assign-role">🍕 Pizza Host</div>
+          <div class="assign-who">Emily</div>
+          <div class="assign-detail" id="meal-detail-sat-pizza">Menu TBD — check back soon</div>
+        </div>
+        <div class="assign-card clean-card">
+          <div class="assign-role">🧹 Cleanup Crew</div>
+          <div class="assign-who">Majcen</div>
+          <div class="assign-detail">Empty the sink · Wipe down surfaces · Kitchen reset · Run dishwasher</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sunday -->
+  <div class="day-card" id="day-sun">
+    <div class="day-header" onclick="toggleDay('day-sun')">
+      <div class="day-header-left"><span class="day-pill">Sunday</span><span class="day-title">Father's Day ☀️</span></div>
+      <span class="day-chevron">▾</span>
+    </div>
+    <div class="day-body">
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">Morning</div><div class="tl-label">Dad's Choice ☕</div><div class="tl-sub">Outings, fishing, kayaking — whatever the dads want</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">12:30 PM</div><div class="tl-label">🥗 Father's Day Lunch at Benson House</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">Afternoon</div><div class="tl-label">🥂 Cheers to the Dads</div><div class="tl-sub">Dock happy hour</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">5:00 PM</div><div class="tl-label">🍻 Dinner at Long Trail</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">Evening</div><div class="tl-label">🔥 Bonfire</div></div>
+      </div>
+      <div class="assign-row">
+        <div class="assign-card meal-card">
+          <div class="assign-role">🍽 Lunch Host</div>
+          <div class="assign-who">Team Barry</div>
+          <div class="assign-detail" id="meal-detail-sun-barry">Menu TBD — check back soon</div>
+        </div>
+        <div class="assign-card clean-card">
+          <div class="assign-role">🧹 Cleanup Crew</div>
+          <div class="assign-who">CT Kalen</div>
+          <div class="assign-detail">Empty the sink · Wipe down surfaces · Kitchen reset · Run dishwasher</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monday -->
+  <div class="day-card" id="day-mon">
+    <div class="day-header" onclick="toggleDay('day-mon')">
+      <div class="day-header-left"><span class="day-pill">Monday</span><span class="day-title">Woodstock + Trivia 🧠</span></div>
+      <span class="day-chevron">▾</span>
+    </div>
+    <div class="day-body">
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">Morning</div><div class="tl-label">Breakfast at Your Pace</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">10:30 AM</div><div class="tl-label">Optional Trip to Woodstock</div><div class="tl-sub">Shopping · Exploring town · Walking the village</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">12:30 PM</div><div class="tl-label">🥪 Lunch out in Woodstock</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">Afternoon</div><div class="tl-label">Lake Activities & Relaxing</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">5:30 PM</div><div class="tl-label">🍽 Dinner at Benson House</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">8:00 PM</div><div class="tl-label">🏆 Family Trivia Championship</div><div class="tl-sub">Teams chosen the night of</div></div>
+      </div>
+      <div class="assign-row">
+        <div class="assign-card meal-card">
+          <div class="assign-role">🍳 Breakfast Host</div>
+          <div class="assign-who">Team Ilene</div>
+          <div class="assign-detail" id="meal-detail-mon-breakfast">Menu TBD — check back soon</div>
+        </div>
+        <div class="assign-card meal-card">
+          <div class="assign-role">🍽 Dinner Host</div>
+          <div class="assign-who">Majcen</div>
+          <div class="assign-detail" id="meal-detail-mon-dinner">Menu TBD — check back soon</div>
+        </div>
+        <div class="assign-card clean-card">
+          <div class="assign-role">🧹 Cleanup Crew</div>
+          <div class="assign-who">Team Barry</div>
+          <div class="assign-detail">Empty the sink · Wipe down surfaces · Kitchen reset · Run dishwasher</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tuesday -->
+  <div class="day-card" id="day-tue">
+    <div class="day-header" onclick="toggleDay('day-tue')">
+      <div class="day-header-left"><span class="day-pill">Tuesday</span><span class="day-title">Golf Day ⛳</span></div>
+      <span class="day-chevron">▾</span>
+    </div>
+    <div class="day-body">
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">7:30 AM</div><div class="tl-label">🍳 Breakfast</div><div class="tl-sub">Dave's cooking</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">8:00 AM – 1:00 PM</div><div class="tl-label">⛳ Golf Group — 18 Holes</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">1:00 PM</div><div class="tl-label">Sandwich Pickup Lunch</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">Morning (Non-Golf)</div><div class="tl-label">Everyone Else</div><div class="tl-sub"><ul><li>Playground outing</li><li>Blueberry picking</li><li>Lake time</li><li>Relaxing at the house</li></ul></div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">Afternoon</div><div class="tl-label">⛵ Boat Outing & Lawn Games</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">5:30 PM</div><div class="tl-label">🍽 Dinner at Benson House</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">6:45 PM</div><div class="tl-label">🎬 Kids Movie Night</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">8:00 PM</div><div class="tl-label">🃏 Poker & Adult Hangout</div></div>
+      </div>
+      <div class="assign-row">
+        <div class="assign-card meal-card">
+          <div class="assign-role">🍳 Breakfast Host</div>
+          <div class="assign-who">Dave</div>
+          <div class="assign-detail" id="meal-detail-tue-breakfast">Menu TBD — check back soon</div>
+        </div>
+        <div class="assign-card meal-card">
+          <div class="assign-role">🍽 Dinner Host</div>
+          <div class="assign-who">MD Kalen</div>
+          <div class="assign-detail" id="meal-detail-tue-dinner">Menu TBD — check back soon</div>
+        </div>
+        <div class="assign-card clean-card">
+          <div class="assign-role">🧹 Cleanup Crew</div>
+          <div class="assign-who">Team Ilene</div>
+          <div class="assign-detail">Empty the sink · Wipe down surfaces · Kitchen reset · Run dishwasher</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wednesday -->
+  <div class="day-card" id="day-wed">
+    <div class="day-header" onclick="toggleDay('day-wed')">
+      <div class="day-header-left"><span class="day-pill">Wednesday</span><span class="day-title">Jack's Birthday 🎂</span></div>
+      <span class="day-chevron">▾</span>
+    </div>
+    <div class="day-body">
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">8:30 AM</div><div class="tl-label">🍳 Group Breakfast at The Hatchery</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">12:30 PM</div><div class="tl-label">Leftovers Lunch</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">3:30 PM</div><div class="tl-label">🎉 Jack's First Birthday Party</div><div class="tl-sub"><ul><li>Cake</li><li>Presents</li><li>Family Photos</li></ul></div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">5:30 PM</div><div class="tl-label">🎂 Birthday Dinner</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">8:00 PM</div><div class="tl-label">🔥 Final Bonfire</div></div>
+      </div>
+      <div class="assign-row">
+        <div class="assign-card meal-card">
+          <div class="assign-role">🎂 Dinner Host</div>
+          <div class="assign-who">CT Kalen</div>
+          <div class="assign-detail" id="meal-detail-wed-dinner">Menu TBD — check back soon</div>
+        </div>
+        <div class="assign-card clean-card">
+          <div class="assign-role">🧹 Cleanup Crew</div>
+          <div class="assign-who">MD Kalen</div>
+          <div class="assign-detail">Empty the sink · Wipe down surfaces · Kitchen reset · Run dishwasher</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thursday -->
+  <div class="day-card" id="day-thu">
+    <div class="day-header" onclick="toggleDay('day-thu')">
+      <div class="day-header-left"><span class="day-pill">Thursday</span><span class="day-title">Departure Day 🚗</span></div>
+      <span class="day-chevron">▾</span>
+    </div>
+    <div class="day-body">
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">Morning</div><div class="tl-label">Coffee, Pack Up & Clean Houses</div><div class="tl-sub">Load cars</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">Afternoon</div><div class="tl-label">Departures 👋</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== GROCERIES ===== -->
+<div class="panel" id="panel-groceries">
+  <div class="form-card">
+    <h3>Add to the Grocery List</h3>
+    <div class="form-desc">Add items you need someone to pick up, or mark that you're already bringing something.</div>
+    <div class="form-group">
+      <label class="form-label">Name</label>
+      <input class="form-input" id="groc-name" type="text" placeholder="First name">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Items</label>
+      <textarea class="form-textarea" id="groc-items" placeholder="e.g. Whole milk, Goldfish crackers, Oat milk — separate with commas or new lines"></textarea>
+    </div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:0.6rem;cursor:pointer;font-size:0.88rem;color:var(--ink);font-weight:500">
+        <input type="checkbox" id="groc-bringing" style="width:16px;height:16px;accent-color:var(--slate);cursor:pointer;flex-shrink:0">
+        I'm bringing these items — no need to purchase
+      </label>
+    </div>
+    <button class="btn btn-primary" onclick="submitGrocery()">Submit</button>
+  </div>
+  <div class="submissions-head">
+    <h3>Grocery List</h3>
+    <span class="badge" id="groc-count">0</span>
+  </div>
+  <div id="groc-list"><div class="empty-state"><div class="empty-icon">🛒</div>No items yet.</div></div>
+</div>
+
+<!-- ===== MEAL PLANS ===== -->
+<div class="panel" id="panel-meals">
+
+  <!-- Quick Reference at top -->
+  <div class="quick-ref">
+    <div class="qr-label">Meal Assignment Quick Reference</div>
+    <div class="qr-row"><span class="qr-meal">Sat · Pizza Night</span><span class="qr-who">Emily</span></div>
+    <div class="qr-row"><span class="qr-meal">Sun · Father's Day Lunch</span><span class="qr-who">Team Barry</span></div>
+    <div class="qr-row"><span class="qr-meal">Mon · Breakfast</span><span class="qr-who">Team Ilene</span></div>
+    <div class="qr-row"><span class="qr-meal">Mon · Dinner</span><span class="qr-who">Majcen</span></div>
+    <div class="qr-row"><span class="qr-meal">Tue · Breakfast</span><span class="qr-who">Dave</span></div>
+    <div class="qr-row"><span class="qr-meal">Tue · Dinner</span><span class="qr-who">MD Kalen</span></div>
+    <div class="qr-row"><span class="qr-meal">Wed · Birthday Dinner</span><span class="qr-who">CT Kalen</span></div>
+  </div>
+
+  <div class="form-card">
+    <h3>Submit Your Meal Plan</h3>
+    <div class="form-desc">Share what you're planning to make so everyone knows what to expect.</div>
+    <div class="form-group">
+      <label class="form-label">Which Meal</label>
+      <select class="form-select" id="meal-day">
+        <option value="">Select assignment...</option>
+        <option>Emily: Saturday — Pizza Night</option>
+        <option>Team Barry: Sunday — Father's Day Lunch</option>
+        <option>Team Ilene: Monday — Breakfast</option>
+        <option>Majcen: Monday — Dinner</option>
+        <option>Dave: Tuesday — Breakfast</option>
+        <option>MD Kalen: Tuesday — Dinner</option>
+        <option>CT Kalen: Wednesday — Birthday Dinner</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">What You're Making</label>
+      <textarea class="form-textarea" id="meal-menu" placeholder="e.g. Grilled chicken, corn on the cob, Caesar salad, garlic bread..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes <span style="font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></label>
+      <input class="form-input" id="meal-note" type="text" placeholder="Prep time, things to know, requests for help...">
+    </div>
+    <button class="btn btn-primary" id="meal-submit-btn" onclick="submitMeal()">Submit Meal Plan</button>
+  </div>
+
+  <div class="submissions-head">
+    <h3>Submitted Meal Plans</h3>
+    <span class="badge" id="meal-count">0</span>
+  </div>
+  <div id="meal-list"><div class="empty-state"><div class="empty-icon">🍽</div>No meal plans submitted yet.</div></div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── JSONBin storage ──────────────────────────────────────────────
+  const JB_KEY  = '$2a$10$ZPnWQ1T4uqYMl8Zjhy1VDOIDaOOhBvTFczoLgsnXjlEbCV0LIRnCe';
+  const JB_BASE = 'https://api.jsonbin.io/v3';
+  const BINS = {
+    groceries: '6a32b1a6da38895dfed0d53d',
+    meals:     '6a32b1afda38895dfed0d56d'
+  };
+
+  async function storageGet(key) {
+    try {
+      const slot = key === 'lake-groceries' ? 'groceries' : 'meals';
+      const r = await fetch(`${JB_BASE}/b/${BINS[slot]}/latest`, { headers: { 'X-Master-Key': JB_KEY } });
+      if (!r.ok) return [];
+      const j = await r.json();
+      const rec = j.record;
+      return Array.isArray(rec?.data) ? rec.data : (Array.isArray(rec) ? rec : []);
+    } catch { return []; }
+  }
+
+  async function storageSet(key, val) {
+    try {
+      const slot = key === 'lake-groceries' ? 'groceries' : 'meals';
+      await fetch(`${JB_BASE}/b/${BINS[slot]}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': JB_KEY },
+        body: JSON.stringify({ data: val })
+      });
+    } catch(e) { console.error('Storage error:', e); }
+  }
+
+  // ── Tab switching ────────────────────────────────────────────────
+  function showTab(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    event.target.classList.add('active');
+    if (name === 'groceries') loadGroceries();
+    if (name === 'meals') loadMeals();
+  }
+
+  function toggleDay(id) { document.getElementById(id).classList.toggle('open'); }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // ── Today's Schedule ─────────────────────────────────────────────
+  // Trip dates: Sat June 21 – Thu June 26, 2025 (adjust year/dates as needed)
+  const TRIP_DAYS = {
+    // key: "YYYY-M-D" matching local date during the trip
+    'sat': { label: 'Saturday', title: 'Arrival Day',         items: [
+      { time: 'Afternoon', label: 'Arrivals & Lake Time',              confirmed: false },
+      { time: '4:00 PM',   label: "🖐 Father's Day Craft",              confirmed: true  },
+      { time: '5:30 PM',   label: '🍕 Pizza Night',                     confirmed: true  },
+      { time: '8:00 PM',   label: '🔥 Bonfire, Cards & Cocktails',      confirmed: false },
+    ]},
+    'sun': { label: 'Sunday',    title: "Father's Day ☀️",    items: [
+      { time: 'Morning',   label: "Dad's Choice ☕",                    confirmed: false },
+      { time: '12:30 PM',  label: "🥗 Father's Day Lunch at Benson House", confirmed: true },
+      { time: 'Afternoon', label: '🥂 Cheers to the Dads — Dock Happy Hour', confirmed: false },
+      { time: '5:00 PM',   label: '🍻 Dinner at Long Trail',            confirmed: false },
+      { time: 'Evening',   label: '🔥 Bonfire',                         confirmed: false },
+    ]},
+    'mon': { label: 'Monday',    title: 'Woodstock + Trivia 🧠', items: [
+      { time: 'Morning',   label: 'Breakfast at Your Pace',             confirmed: true  },
+      { time: '10:30 AM',  label: 'Optional Trip to Woodstock',         confirmed: false },
+      { time: '12:30 PM',  label: '🥪 Lunch out in Woodstock',          confirmed: false },
+      { time: '5:30 PM',   label: '🍽 Dinner at Benson House',          confirmed: true  },
+      { time: '8:00 PM',   label: '🏆 Family Trivia Championship',      confirmed: true  },
+    ]},
+    'tue': { label: 'Tuesday',   title: 'Golf Day ⛳',          items: [
+      { time: '7:30 AM',   label: "🍳 Breakfast — Dave's Cooking",      confirmed: true  },
+      { time: '8:00 AM',   label: '⛳ Golf Group — 18 Holes',           confirmed: true  },
+      { time: '1:00 PM',   label: 'Sandwich Pickup Lunch',              confirmed: false },
+      { time: 'Afternoon', label: '⛵ Boat Outing & Lawn Games',         confirmed: false },
+      { time: '5:30 PM',   label: '🍽 Dinner at Benson House',          confirmed: true  },
+      { time: '6:45 PM',   label: '🎬 Kids Movie Night',                confirmed: false },
+      { time: '8:00 PM',   label: '🃏 Poker & Adult Hangout',           confirmed: false },
+    ]},
+    'wed': { label: 'Wednesday', title: "Jack's Birthday 🎂",  items: [
+      { time: '8:30 AM',   label: '🍳 Group Breakfast at The Hatchery', confirmed: false },
+      { time: '12:30 PM',  label: 'Leftovers Lunch',                    confirmed: false },
+      { time: '3:30 PM',   label: "🎉 Jack's First Birthday Party",     confirmed: true  },
+      { time: '5:30 PM',   label: '🎂 Birthday Dinner',                 confirmed: true  },
+      { time: '8:00 PM',   label: '🔥 Final Bonfire',                   confirmed: false },
+    ]},
+    'thu': { label: 'Thursday',  title: 'Departure Day 🚗',    items: [
+      { time: 'Morning',   label: 'Coffee, Pack Up & Clean Houses',     confirmed: false },
+      { time: 'Afternoon', label: 'Departures 👋',                      confirmed: false },
+    ]},
+  };
+
+  // Trip runs Sat June 21 – Thu June 26, 2026
+  // Use explicit constructor to avoid UTC vs local timezone parsing bugs
+  const TRIP_START = new Date(2026, 5, 21); // month is 0-indexed: 5 = June
+  const TRIP_KEYS  = ['sat','sun','mon','tue','wed','thu'];
+
+  function getTripDayKey() {
+    const today = new Date();
+    // Strip time — compare dates only
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const startMidnight = new Date(TRIP_START.getFullYear(), TRIP_START.getMonth(), TRIP_START.getDate());
+    const diffDays = Math.round((todayMidnight - startMidnight) / (1000 * 60 * 60 * 24));
+    if (diffDays < 0) return { mode: 'countdown', daysUntil: Math.abs(diffDays) };
+    if (diffDays >= 0 && diffDays <= 5) return { mode: 'trip', key: TRIP_KEYS[diffDays] };
+    return { mode: 'after' };
+  }
+
+  function renderTodaySchedule() {
+    const el = document.getElementById('today-schedule');
+    const state = getTripDayKey();
+
+    if (state.mode === 'countdown') {
+      const d = state.daysUntil;
+      const facts = [
+        { emoji: '🏔️', fact: 'Lake Rescue sits at 1,520 feet elevation in the Green Mountains — one of the highest lakes in Vermont.' },
+        { emoji: '🎣', fact: 'Lake Rescue is stocked with rainbow trout, brown trout, and smallmouth bass. Fishing licenses are available online at vtfishandwildlife.com.' },
+        { emoji: '🍁', fact: 'Vermont has more maple syrup producers than any other state. The Green Mountains produce over 2 million gallons a year.' },
+        { emoji: '🏘️', fact: 'Ludlow, VT is home to Okemo Mountain Resort — one of the most family-friendly ski mountains in New England.' },
+        { emoji: '🦦', fact: 'River otters, great blue herons, and osprey are all commonly spotted around Lake Rescue and nearby waterways.' },
+        { emoji: '🌟', fact: 'Vermont has some of the darkest skies on the East Coast. On a clear night at the lake, you can see the Milky Way with the naked eye.' },
+        { emoji: '🏡', fact: 'Woodstock, VT — on the itinerary for Monday — was named "the prettiest small town in America" by Smithsonian Magazine.' },
+        { emoji: '🎿', fact: 'Vermont was the first state in the US to have a ski tow, installed in 1934 in Woodstock — just down the road from the lake.' },
+        { emoji: '🧀', fact: 'Vermont produces more cheese per capita than any other US state. Look out for local cheddar at the Woodstock farmers market.' },
+        { emoji: '💧', fact: 'Lake Rescue is connected to Echo Lake and Lake Amherst, forming a chain of three lakes — all within a short paddle of each other.' },
+      ];
+      const fact = facts[Math.floor(Math.random() * facts.length)];
+      el.innerHTML = `
+        <div class="today-card">
+          <div class="today-header">
+            <div class="th-eyebrow">T-minus ${d} ${d === 1 ? 'day' : 'days'}</div>
+            <div class="th-title">The lake awaits! 🌊</div>
+          </div>
+          <div class="today-body">
+            <div style="display:flex;gap:0.85rem;align-items:flex-start;padding:0.5rem 0">
+              <div style="font-size:1.75rem;line-height:1;padding-top:0.1rem">${fact.emoji}</div>
+              <div>
+                <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--pine);margin-bottom:0.35rem">Did you know?</div>
+                <div style="font-size:0.88rem;color:var(--ink);line-height:1.55">${fact.fact}</div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      return;
+    }
+
+    if (state.mode === 'after') {
+      el.innerHTML = '<div class="no-today">What a week! Hope everyone made it home safely. 🏠</div>';
+      return;
+    }
+
+    const day = TRIP_DAYS[state.key];
+    el.innerHTML = `
+      <div class="today-card">
+        <div class="today-header">
+          <div class="th-eyebrow">${day.label}</div>
+          <div class="th-title">${day.title}</div>
+        </div>
+        <div class="today-body">
+          ${day.items.map(i => `
+            <div class="today-item">
+              <div class="ti-time">${i.time}</div>
+              <div class="ti-label">${i.label}</div>
+              <div class="ti-badge ${i.confirmed ? 'confirmed' : 'flexible'}">${i.confirmed ? '✓ Confirmed' : 'Flexible'}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+  }
+
+  // ── Weather ──────────────────────────────────────────────────────
+  async function loadWeather() {
+    try {
+      const lat = 43.3962, lon = -72.7040;
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&hourly=precipitation_probability,temperature_2m&temperature_unit=fahrenheit&timezone=America%2FNew_York&forecast_days=1`;
+      const r = await fetch(url);
+      const j = await r.json();
+      const d = j.daily;
+      const high = Math.round(d.temperature_2m_max[0]);
+      const low  = Math.round(d.temperature_2m_min[0]);
+      const precip = d.precipitation_probability_max[0];
+      const code = d.weathercode[0];
+
+      const icons = { 0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️', 45:'🌫️', 48:'🌫️', 51:'🌦️', 53:'🌦️', 55:'🌧️', 61:'🌧️', 63:'🌧️', 65:'🌧️', 71:'❄️', 73:'❄️', 75:'❄️', 80:'🌦️', 81:'🌧️', 82:'⛈️', 95:'⛈️', 96:'⛈️', 99:'⛈️' };
+      const descs = { 0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast', 45:'Fog', 48:'Fog', 51:'Light drizzle', 53:'Drizzle', 55:'Heavy drizzle', 61:'Light rain', 63:'Rain', 65:'Heavy rain', 71:'Light snow', 73:'Snow', 75:'Heavy snow', 80:'Showers', 81:'Rain showers', 82:'Heavy showers', 95:'Thunderstorm', 96:'Thunderstorm', 99:'Thunderstorm' };
+      const icon = icons[code] || '🌡️';
+      const desc = descs[code] || 'See forecast';
+
+      // Hourly data — 24 values for today
+      const hours = j.hourly.precipitation_probability.slice(0, 24);
+      const temps = j.hourly.temperature_2m.slice(0, 24);
+      const labels = ['12a','1','2','3','4','5','6','7','8','9','10','11','12p','1','2','3','4','5','6','7','8','9','10','11'];
+
+      // Build SVG chart — show every 3 hours for readability
+      const step = 3;
+      const chartHours = hours.filter((_,i) => i % step === 0);
+      const chartLabels = labels.filter((_,i) => i % step === 0);
+      const chartTemps = temps.filter((_,i) => i % step === 0);
+      const maxP = Math.max(...chartHours, 10);
+      const W = 260, H = 55, pad = 4;
+      const barW = Math.floor((W - pad * 2) / chartHours.length) - 2;
+
+      const bars = chartHours.map((p, i) => {
+        const x = pad + i * ((W - pad*2) / chartHours.length);
+        const barH = Math.max(2, Math.round((p / 100) * (H - 18)));
+        const y = H - barH - 14;
+        const blue = p > 60 ? '#5b9fd4' : p > 30 ? '#8bbfdf' : '#b8d9ee';
+        return `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="2" fill="${blue}"/>
+                <text x="${x + barW/2}" y="${H - 2}" text-anchor="middle" font-size="7" fill="#8bbfdf">${chartLabels[i]}</text>
+                ${p > 0 ? `<text x="${x + barW/2}" y="${y - 2}" text-anchor="middle" font-size="7" fill="#c8e0f0">${p}%</text>` : ''}`;
+      }).join('');
+
+      document.getElementById('weather-widget').innerHTML = `
+        <div class="weather-bar" style="flex-direction:column;align-items:flex-start;gap:0.6rem">
+          <span class="wb-loc">📍 Ludlow, VT — Today's Forecast</span>
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;width:100%">
+            <span class="wb-icon">${icon}</span>
+            <div class="wb-temps">
+              <span class="wb-high">${high}°F</span>
+              <span class="wb-low">↓ ${low}°F</span>
+            </div>
+            <span class="wb-desc">${desc}</span>
+            <span class="wb-precip">🌧 ${precip}% max rain chance</span>
+          </div>
+          <div style="width:100%">
+            <div style="font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--water);margin-bottom:4px">Hourly Rain Chance</div>
+            <svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;max-width:${W}px">
+              ${bars}
+            </svg>
+          </div>
+        </div>`;
+    } catch {
+      document.getElementById('weather-widget').innerHTML = `
+        <div class="weather-bar"><span class="weather-loading">Weather unavailable — check weather.com for Ludlow, VT</span></div>`;
+    }
+  }
+
+  // ── Groceries ────────────────────────────────────────────────────
+  const PRELOADED_GROCERIES = {
+    id: 0, family: 'House List', name: 'Pre-loaded',
+    items: '3 Dozen Eggs\n1 Gallon Whole Milk\nOat Milk\nButter\nOlive Oil\nMayo\nKetchup\nMustard\nFamily Size Cheerios\nFrozen Mini Pancakes\nSandwich Bread\n2lbs Turkey\n2lbs Ham\n1lb Salami\n2lbs American Cheese\nShredded Cheddar Cheese\nFamily Size Ruffles\nSour Cream\nWatermelon\nStrawberries\nBananas\nApples\nPeanut Butter\nLipton French Onion Mix\nFamily Size Doritos\nFamily Size Kettle Corn\n48 Water Bottles\n48 Cans of Seltzer\n1 Gallon Orange Juice\n2 Unsweetened Stok\nRaspberry Fig Bars\nFamily Size Veggie Sticks\n100 Paper Plates\nPlastic Utensils\n4 Boxes Frozen Sausage\nMaple Syrup\nWhipped Cream\n1 Gallon Vanilla Ice Cream\n2 Boxes Jolly Pops\n1 Bag Egg Noodles\n1 Box Veggie Nuggets\n1 Bag Chicken Nuggets\n2 Boxes Annie\'s Mac and Cheese\nPesto\nVodka Sauce',
+    note: '', ts: 'Pre-loaded', preloaded: true
+  };
+
+  function formatItems(items) {
+    return items.split(/,|\n/).map(s => s.trim()).filter(Boolean);
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  async function submitGrocery() {
+    const name = document.getElementById('groc-name').value.trim();
+    const items = document.getElementById('groc-items').value.trim();
+    const bringing = document.getElementById('groc-bringing').checked;
+    if (!name || !items) { showToast('Please fill in your name and items.'); return; }
+    const list = await storageGet('lake-groceries');
+    list.push({ id: Date.now(), family: name, name, items, bringing, ts: new Date().toLocaleDateString() });
+    await storageSet('lake-groceries', list);
+    document.getElementById('groc-name').value = '';
+    document.getElementById('groc-items').value = '';
+    document.getElementById('groc-bringing').checked = false;
+    showToast(bringing ? '✓ Added as "bringing it"!' : '✓ Added to grocery list!');
+    loadGroceries();
+  }
+
+  async function deleteGrocery(id) {
+    let list = await storageGet('lake-groceries');
+    list = list.filter(i => i.id !== id);
+    await storageSet('lake-groceries', list);
+    loadGroceries();
+  }
+
+  function exportGroceryList() {
+    // Get all items from the DOM
+    const needed = [];
+    const covered = [];
+
+    // Preloaded items are always "needed" unless covered by a submission
+    const preloadedItems = formatItems(PRELOADED_GROCERIES.items);
+
+    // Get all submitted "bringing" items flattened
+    const bringingItems = [];
+    document.querySelectorAll('[data-bringing="true"]').forEach(el => {
+      const raw = el.getAttribute('data-items');
+      formatItems(raw).forEach(i => bringingItems.push(i.toLowerCase()));
+    });
+
+    // Dedupe: preloaded items not covered by bringing
+    preloadedItems.forEach(item => {
+      const isCovered = bringingItems.some(b => b.includes(item.toLowerCase()) || item.toLowerCase().includes(b));
+      if (isCovered) covered.push(item);
+      else needed.push(item);
+    });
+
+    // Any submitted non-bringing items not already in preloaded
+    document.querySelectorAll('[data-bringing="false"]').forEach(el => {
+      const raw = el.getAttribute('data-items');
+      formatItems(raw).forEach(item => {
+        if (!preloadedItems.some(p => p.toLowerCase() === item.toLowerCase())) {
+          needed.push(item);
+        }
+      });
+    });
+
+    const text = `NEED TO BUY\n${'─'.repeat(30)}\n${needed.length ? needed.map(i => `• ${i}`).join('\n') : '(none)'}\n\nCOVERED — SOMEONE'S BRINGING\n${'─'.repeat(30)}\n${covered.length ? covered.map(i => `• ${i}`).join('\n') : '(none)'}\n\nREMOVED FROM SHOPPING LIST (fuzzy match — verify these)\n${'─'.repeat(30)}\n${covered.length ? covered.map(i => `• "${i}" matched a "bringing it" submission`).join('\n') : '(none)'}`;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'lake-rescue-grocery-list.txt'; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function loadGroceries() {
+    const stored = await storageGet('lake-groceries');
+    const list = [PRELOADED_GROCERIES, ...stored];
+    const el = document.getElementById('groc-list');
+    document.getElementById('groc-count').textContent = list.length;
+
+    // Split into sections
+    const bringing = stored.filter(i => i.bringing);
+    const requesting = stored.filter(i => !i.bringing);
+
+    let html = '';
+
+    // House list
+    const preLines = formatItems(PRELOADED_GROCERIES.items);
+    const itemsHtml = `<ul style="list-style:none;padding:0;margin:0">${preLines.map(l => `<li style="padding:0.15rem 0;border-bottom:1px solid rgba(0,0,0,0.04)">${escHtml(l)}</li>`).join('')}</ul>`;
+    html += `<div class="grocery-item">
+      <span class="gi-family">House List</span>
+      <div class="gi-content"><div class="gi-items">${itemsHtml}</div></div>
+    </div>`;
+
+    // Requested items
+    requesting.forEach(i => {
+      const lines = formatItems(i.items);
+      const ih = `<ul style="list-style:none;padding:0;margin:0">${lines.map(l => `<li style="padding:0.15rem 0;border-bottom:1px solid rgba(0,0,0,0.04)">${escHtml(l)}</li>`).join('')}</ul>`;
+      html += `<div class="grocery-item" data-bringing="false" data-items="${escHtml(i.items)}">
+        <span class="gi-family">${escHtml(i.name)}</span>
+        <div class="gi-content">
+          <div class="gi-items">${ih}</div>
+          <div class="gi-note" style="margin-top:0.3rem;opacity:0.6">${i.ts}</div>
+        </div>
+        <button class="gi-delete" onclick="deleteGrocery(${i.id})" title="Remove">✕</button>
+      </div>`;
+    });
+
+    // Bringing items
+    if (bringing.length) {
+      html += `<div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--success);margin:1rem 0 0.5rem">✓ Someone's Bringing</div>`;
+      bringing.forEach(i => {
+        const lines = formatItems(i.items);
+        const ih = `<ul style="list-style:none;padding:0;margin:0">${lines.map(l => `<li style="padding:0.15rem 0;border-bottom:1px solid rgba(0,0,0,0.04);text-decoration:line-through;color:var(--muted)">${escHtml(l)}</li>`).join('')}</ul>`;
+        html += `<div class="grocery-item" data-bringing="true" data-items="${escHtml(i.items)}" style="opacity:0.75;border-left:3px solid var(--success)">
+          <span class="gi-family" style="background:#d4edda;color:#2d6a3f">${escHtml(i.name)}</span>
+          <div class="gi-content">
+            <div class="gi-items">${ih}</div>
+            <div class="gi-note" style="margin-top:0.3rem;opacity:0.6">${i.ts}</div>
+          </div>
+          <button class="gi-delete" onclick="deleteGrocery(${i.id})" title="Remove">✕</button>
+        </div>`;
+      });
+    }
+
+    // Export button
+    html += `<div style="margin-top:1.25rem">
+      <button class="btn btn-primary" onclick="exportGroceryList()" style="width:100%">⬇ Export Shopping List</button>
+    </div>`;
+
+    el.innerHTML = html;
+  }
+
+  // ── Meal Plans ───────────────────────────────────────────────────
+  const MEAL_TILE_MAP = {
+    'Emily: Saturday — Pizza Night':            'meal-detail-sat-pizza',
+    'Team Barry: Sunday — Father\'s Day Lunch': 'meal-detail-sun-barry',
+    'Team Ilene: Monday — Breakfast':           'meal-detail-mon-breakfast',
+    'Majcen: Monday — Dinner':                  'meal-detail-mon-dinner',
+    'Dave: Tuesday — Breakfast':                'meal-detail-tue-breakfast',
+    'MD Kalen: Tuesday — Dinner':               'meal-detail-tue-dinner',
+    'CT Kalen: Wednesday — Birthday Dinner':    'meal-detail-wed-dinner',
+  };
+
+  function updateItineraryTile(day, menu) {
+    const id = MEAL_TILE_MAP[day];
+    if (id) { const el = document.getElementById(id); if (el) el.textContent = menu; }
+  }
+
+  let _editingMealDay = null;
+
+  async function submitMeal() {
+    const day  = document.getElementById('meal-day').value;
+    const menu = document.getElementById('meal-menu').value.trim();
+    const note = document.getElementById('meal-note').value.trim();
+    if (!day || !menu) { showToast('Please select a meal and enter a menu.'); return; }
+    const list = await storageGet('lake-meals');
+    const idx = list.findIndex(i => i.day === day);
+    const entry = { id: Date.now(), day, menu, note, ts: new Date().toLocaleDateString() };
+    if (idx >= 0) list[idx] = entry; else list.push(entry);
+    await storageSet('lake-meals', list);
+    document.getElementById('meal-day').value = '';
+    document.getElementById('meal-menu').value = '';
+    document.getElementById('meal-note').value = '';
+    document.getElementById('meal-submit-btn').textContent = 'Submit Meal Plan';
+    _editingMealDay = null;
+    updateItineraryTile(day, menu);
+    showToast('✓ Meal plan saved!');
+    loadMeals();
+  }
+
+  async function deleteMeal(day) {
+    if (!confirm(`Remove the meal plan for "${day}"?`)) return;
+    let list = await storageGet('lake-meals');
+    list = list.filter(i => i.day !== day);
+    await storageSet('lake-meals', list);
+    updateItineraryTile(day, 'Menu TBD — check back soon');
+    showToast('Meal plan removed.');
+    loadMeals();
+  }
+
+  function editMeal(day, menu, note) {
+    _editingMealDay = day;
+    const sel = document.getElementById('meal-day');
+    for (let o of sel.options) { if (o.value === day) { sel.value = day; break; } }
+    document.getElementById('meal-menu').value = menu;
+    document.getElementById('meal-note').value = note || '';
+    document.getElementById('meal-submit-btn').textContent = 'Save Changes';
+    document.getElementById('meal-submit-btn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  async function loadMeals() {
+    const list = await storageGet('lake-meals');
+    const el = document.getElementById('meal-list');
+    document.getElementById('meal-count').textContent = list.length;
+    list.forEach(i => updateItineraryTile(i.day, i.menu));
+    if (!list.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">🍽</div>No meal plans submitted yet.</div>';
+      return;
+    }
+    el.innerHTML = list.map(i => `
+      <div class="meal-item">
+        <div class="mi-header"><span class="mi-day">${i.day}</span></div>
+        <div class="mi-menu">${escHtml(i.menu)}</div>
+        ${i.note ? `<div class="mi-note">📝 ${escHtml(i.note)}</div>` : ''}
+        <div class="mi-actions">
+          <button class="mi-btn mi-btn-edit" onclick="editMeal(${JSON.stringify(i.day)},${JSON.stringify(i.menu)},${JSON.stringify(i.note||'')})">✏️ Edit</button>
+          <button class="mi-btn mi-btn-delete" onclick="deleteMeal(${JSON.stringify(i.day)})">✕ Delete</button>
+        </div>
+      </div>`).join('');
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────
+  renderTodaySchedule();
+  loadWeather();
+  loadMeals();
+  loadGroceries();
+</script>
+</body>
+</html>
